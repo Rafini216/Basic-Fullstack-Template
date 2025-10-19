@@ -3,7 +3,7 @@ import React from 'react';
 export default function MovieActions({ movie, onToggleWatched, onDelete, onEdit, className = '' }) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      {/* Edit button: hidden on hover-only for larger screens */}
+
       <button
         onClick={() => onEdit && onEdit(movie)}
         title="Editar"
@@ -13,7 +13,7 @@ export default function MovieActions({ movie, onToggleWatched, onDelete, onEdit,
         <img src='/icons/pencil.svg' alt="Editar" className="w-4 h-4" />
       </button>
 
-      {/* Delete button: hidden on hover-only for larger screens */}
+
       <button
         onClick={() => onDelete(movie)}
         title="Apagar"
@@ -23,7 +23,7 @@ export default function MovieActions({ movie, onToggleWatched, onDelete, onEdit,
         <img src='/icons/trash.svg' alt="Apagar" className="w-4 h-4" />
       </button>
 
-      {/* Watched toggle: always visible */}
+
       <button
         onClick={() => onToggleWatched(movie)}
         title={movie.watched ? 'Marcar como não visto' : 'Marcar como visto'}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { loadMoviesAPI, deleteMovieAPI, updateMovieAPI } from '../services/api';
+import { loadMoviesAPI, updateMovieAPI } from '../services/api';
+import useMovieListActions from '../hooks/useMovieListActions';
 import PosterImage from '../components/ui/PosterImage';
 import MovieInfo from '../components/ui/MovieInfo';
 import MovieActions from '../components/ui/MovieActions';
@@ -14,13 +15,13 @@ export default function WatchedMovies() {
 	const fetchMovies = async () => {
 		try {
 			setLoading(true);
-			setError('');
+			setError(''); 
 			const data = await loadMoviesAPI({ sortBy: 'createdAt', order: 'desc', watched: true });
-			setMovies(data);
-		} catch (e) {
-			setError(e.message || 'Failed to load movies');
-		} finally {
-			setLoading(false);
+			setMovies(data); 
+		} catch (e) { 
+			setError(e.message || 'Failed to load movies'); 
+		} finally { 
+			setLoading(false); 
 		}
 	};
 
@@ -31,33 +32,7 @@ export default function WatchedMovies() {
 		return () => window.removeEventListener('movies:changed', handler);
 	}, []);
 
-	const toggleWatched = async (m) => {
-		const prev = movies;
-		// Optimistically remove the movie from this list (it won't belong here anymore)
-		setMovies((list) => list.filter((it) => it._id !== m._id));
-		try {
-			await updateMovieAPI(m._id, { watched: !m.watched });
-			if (typeof window !== 'undefined') {
-				window.dispatchEvent(new CustomEvent('movies:counts-changed'));
-			}
-		} catch (e) {
-			setMovies(prev);
-			alert(e.message || 'Failed to update');
-		}
-	};
-
-	const deleteMovie = async (m) => {
-		if (!confirm(`Delete ${m.title}?`)) return;
-		try {
-			await deleteMovieAPI(m._id);
-			if (typeof window !== 'undefined') {
-				window.dispatchEvent(new CustomEvent('movies:changed'));
-			}
-			fetchMovies();
-		} catch (e) {
-			alert(e.message || 'Failed to delete');
-		}
-	};
+	const { toggleWatched, deleteMovie } = useMovieListActions({ movies, setMovies, listType: 'watched' });
 
 	const startEdit = (m) => setEditing(m);
 	const closeEdit = () => setEditing(null);

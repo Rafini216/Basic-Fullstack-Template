@@ -5,6 +5,7 @@ import WatchedMovies from '../components/WatchedMovies';
 import NotWatchedMovies from '../components/NotWatchedMovies';
 import MoviesByRating from '../components/MoviesByRating';
 import { loadMoviesAPI } from '../services/api';
+import FilterSelect from '../components/ui/FilterSelect';
 
 export default function Home() {
   const [tab, setTab] = useState('all'); // 'all' | 'watched' | 'unwatched' | 'rating'
@@ -37,33 +38,15 @@ export default function Home() {
     <div className="bg-gray-100 min-h-screen p-5 flex items-center justify-center">
       <div className="w-[390px] max-w-full mx-auto flex flex-col gap-5">
         <AddMovie />
-        <div className="flex gap-2">
-          <button
-            className={`px-3 py-1 rounded-md border text-sm ${tab==='all' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300'}`}
-            onClick={() => setTab('all')}
-          >
-            Todos ({counts.all})
-          </button>
-          <button
-            className={`px-3 py-1 rounded-md border text-sm ${tab==='watched' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300'}`}
-            onClick={() => setTab('watched')}
-          >
-            Vistos ({counts.watched})
-          </button>
-          <button
-            className={`px-3 py-1 rounded-md border text-sm ${tab==='unwatched' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300'}`}
-            onClick={() => setTab('unwatched')}
-          >
-            Não vistos ({counts.unwatched})
-          </button>
-        </div>
-        <div className="flex gap-2">
-          <button
-            className={`px-3 py-1 rounded-md border text-sm ${tab==='rating' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300'}`}
-            onClick={() => setTab('rating')}
-          >
-            Por Avaliação
-          </button>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="filterSelect" className="text-sm text-gray-700">Filtrar por:</label>
+          <FilterSelect
+            value={tab}
+            onChange={(e) => setTab(e.target.value)}
+            counts={counts}
+            className=""
+            id="filterSelect"
+          />
         </div>
         {tab === 'all' && <AllMovies />}
         {tab === 'watched' && <WatchedMovies />}

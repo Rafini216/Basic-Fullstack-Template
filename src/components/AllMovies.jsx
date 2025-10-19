@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { loadMoviesAPI, deleteMovieAPI, updateMovieAPI } from '../services/api';
+import { loadMoviesAPI, updateMovieAPI } from '../services/api';
+import useMovieListActions from '../hooks/useMovieListActions';
 import PosterImage from '../components/ui/PosterImage';
 import MovieInfo from '../components/ui/MovieInfo';
 import MovieActions from '../components/ui/MovieActions';
@@ -10,7 +11,7 @@ export default function AllMovies() {
 	const [movies, setMovies] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
-    const [editing, setEditing] = useState(null);
+	const [editing, setEditing] = useState(null);
 
 	const fetchMovies = async () => {
 		try {
@@ -32,33 +33,7 @@ export default function AllMovies() {
 		return () => window.removeEventListener('movies:changed', handler);
 	}, []);
 
-	const toggleWatched = async (m) => {
-		const prev = movies;
-		const next = movies.map((it) => (it._id === m._id ? { ...it, watched: !it.watched } : it));
-		setMovies(next);
-		try {
-			await updateMovieAPI(m._id, { watched: !m.watched });
-			if (typeof window !== 'undefined') {
-				window.dispatchEvent(new CustomEvent('movies:counts-changed'));
-			}
-		} catch (e) {
-			setMovies(prev);
-			alert(e.message || 'Failed to update');
-		}
-	};
-
-	const deleteMovie = async (m) => {
-		if (!confirm(`Delete ${m.title}?`)) return;
-		try {
-			await deleteMovieAPI(m._id);
-			if (typeof window !== 'undefined') {
-				window.dispatchEvent(new CustomEvent('movies:changed'));
-			}
-			fetchMovies();
-		} catch (e) {
-			alert(e.message || 'Failed to delete');
-		}
-	};
+    const { toggleWatched, deleteMovie } = useMovieListActions({ movies, setMovies, listType: 'all' });
 
 		const startEdit = (m) => setEditing(m);
 		const closeEdit = () => setEditing(null);

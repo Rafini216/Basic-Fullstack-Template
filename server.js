@@ -239,7 +239,7 @@ app.put('/api/filmes/:id', async (req, res) => {
       updates.year = Number.isNaN(y) ? undefined : y;
     }
 
-    // If title changed and no posterUrl/year/imdbID provided, enrich via TMDb
+
     if (updates.title && posterUrl === undefined && imdbID === undefined && year === undefined) {
       try {
         const meta = await fetchPoster(updates.title, undefined);
