@@ -18,10 +18,7 @@ const Movie = require('./models/Filme');
 
 // ===== ENDPOINTS DA API =====
 
-// Obter poster de filme via OMDb API
-
-
-// Função utilitária para obter poster via TMDb (se TMDB_API_KEY existir)
+// obter poster via TMDb 
 async function fetchPosterFromTMDb(title, year) {
   try {
     const apiKey = process.env.TMDB_API_KEY;
@@ -61,7 +58,7 @@ async function fetchPosterFromTMDb(title, year) {
   const resolvedTitle = candidate.title;
   const originalTitle = candidate.original_title;
 
-    // Detalhes do filme (para obter géneros legíveis)
+    // géneros do filme
     let genres;
     try {
       const detailsParams = new URLSearchParams({ api_key: apiKey, language });
@@ -74,7 +71,7 @@ async function fetchPosterFromTMDb(title, year) {
       }
     } catch {}
 
-    // Opcional: obter imdbID via external_ids (chamada extra)
+    // imdbID para link do IMDb
     let imdbID;
     try {
       const extParams = new URLSearchParams({ api_key: apiKey });
@@ -91,11 +88,9 @@ async function fetchPosterFromTMDb(title, year) {
   }
 }
 
-// Função unificada que decide o provider conforme env
-// Função unificada (TMDb-only)
+
 async function fetchPoster(title, year) {
-  if (!process.env.TMDB_API_KEY) return null;
-  return (await fetchPosterFromTMDb(title, year)) || null;
+  return process.env.TMDB_API_KEY ? fetchPosterFromTMDb(title, year) : null;
 }
 
 // GET /api/filmes - Carrega todos os filmes, com filtros e ordenação
@@ -217,7 +212,7 @@ app.post('/api/filmes', async (req, res) => {
 app.put('/api/filmes/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, genre, watched, rating} = req.body || {};
+    const { title, genre, watched, rating, posterUrl, imdbID, year } = req.body || {};
 
     const updates = {};
     if (title !== undefined) {
@@ -237,11 +232,33 @@ app.put('/api/filmes/:id', async (req, res) => {
       updates.rating = Number.isNaN(r) ? undefined : r;
     }
 
+    if (posterUrl !== undefined) updates.posterUrl = posterUrl || undefined;
+    if (imdbID !== undefined) updates.imdbID = imdbID || undefined;
+    if (year !== undefined) {
+      const y = Number(year);
+      updates.year = Number.isNaN(y) ? undefined : y;
+    }
+
+    // If title changed and no posterUrl/year/imdbID provided, enrich via TMDb
+    if (updates.title && posterUrl === undefined && imdbID === undefined && year === undefined) {
+      try {
+        const meta = await fetchPoster(updates.title, undefined);
+        if (meta) {
+          if (meta.posterUrl) updates.posterUrl = meta.posterUrl;
+          if (Array.isArray(meta.genres)) updates.genre = (updates.genre || genre || '').trim() || meta.genres.join(', ');
+          if (meta.imdbID) updates.imdbID = meta.imdbID;
+          if (meta.year) updates.year = meta.year;
+        }
+      } catch {}
+    }
+
+    updates.updatedAt = new Date();
+
     const updated = await Movie.findByIdAndUpdate(
       id,
       { $set: updates },
       { new: true, runValidators: true }
-    ).lean();
+  ).lean();
 
     if (!updated) return res.status(404).json({ erro: 'Filme não encontrado' });
     res.json(updated);
