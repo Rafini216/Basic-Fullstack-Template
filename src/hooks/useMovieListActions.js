@@ -5,10 +5,8 @@ export default function useMovieListActions({ movies, setMovies, listType = 'all
   const toggleWatched = async (m) => {
     const prev = movies;
     if (listType === 'watched' || listType === 'unwatched') {
-      // Item moves to the other list; remove it here optimistically
       setMovies((list) => list.filter((it) => it._id !== m._id));
     } else {
-      // Flip watched in place
       setMovies((list) => list.map((it) => (it._id === m._id ? { ...it, watched: !it.watched } : it)));
     }
     try {

@@ -34,7 +34,7 @@ export default function EditMovie({ movie, onClose, onSave, saving = false }) {
       <div className="bg-white rounded-xl w-full max-w-sm p-4 shadow-lg">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold">Editar Filme</h3>
-          <button onClick={onClose} aria-label="Fechar" title="Fechar" className="w-7 h-7 rounded-md border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50">
+          <button onClick={onClose} title="Fechar" className="w-7 h-7 rounded-md border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50">
             ×
           </button>
         </div>
