@@ -121,7 +121,7 @@ export default function AddMovie() {
 			if (rating) payload.rating = Number(rating);
 
 			await AddMovieAPI(payload);
-			setSuccess('Movie added.');
+			setSuccess('Filme adicionado com sucesso!');
 
 			setTitle('');
 			setGenre('');
@@ -134,7 +134,7 @@ export default function AddMovie() {
 				window.dispatchEvent(new CustomEvent('movies:changed'));
 			}
 		} catch (e) {
-			setError(e.message || 'Failed to add movie.');
+			setError(e.message || 'Falha ao adicionar filme.');
 		} finally {
 			setLoading(false);
 		}
@@ -151,24 +151,7 @@ export default function AddMovie() {
 						value={title}
 						onChange={(e) => setTitle(e.target.value)}
 						onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-						onKeyDown={(e) => {
-							if (!showSuggestions || suggestions.length === 0) return;
-							if (e.key === 'ArrowDown') {
-								e.preventDefault();
-								setHighlightIndex((i) => Math.min(i + 1, suggestions.length - 1));
-							} else if (e.key === 'ArrowUp') {
-								e.preventDefault();
-								setHighlightIndex((i) => Math.max(i - 1, 0));
-							} else if (e.key === 'Enter') {
-								if (highlightIndex >= 0 && highlightIndex < suggestions.length) {
-									e.preventDefault();
-									handlePickSuggestion(suggestions[highlightIndex]);
-								}
-							} else if (e.key === 'Escape') {
-								setShowSuggestions(false);
-							}
-						}}
-						placeholder="e.g., The Purge"
+						placeholder="ex: A Origem"
 						style={{ width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 8 }}
 					/>
 					{showSuggestions && suggestions.length > 0 && (
@@ -202,12 +185,12 @@ export default function AddMovie() {
 				</div>
 
 				<label>
-					<div>Year released</div>
+					<div>Ano de lançamento</div>
 					<input type="text" value={detectedYear} readOnly style={{ width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 8, background: '#f9fafb' }} />
 				</label>
 
 				<label>
-					<div>Genre</div>
+					<div>Género</div>
 					<input
 						type="text"
 						value={genre}
@@ -219,13 +202,13 @@ export default function AddMovie() {
 
 
 				<label>
-					<div>Rating (1–10, optional)</div>
+					<div>Rating</div>
 					<select
 						value={rating}
 						onChange={(e) => setRating(e.target.value)}
 						style={{ width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 8 }}
 					>
-						<option value="">No rating</option>
+						<option value="">Sem rating</option>
 						{Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
 							<option key={n} value={String(n)}>
 								{n}
@@ -238,7 +221,7 @@ export default function AddMovie() {
 				{success && <div style={{ color: '#065f46' }}>{success}</div>}
 
 				<button type="submit" disabled={loading} style={{ padding: '10px 14px', borderRadius: 8, background: '#111827', color: '#fff', border: 'none' }}>
-					{loading ? 'Saving…' : 'Add Movie'}
+					{loading ? 'Saving…' : 'Adicionar Filme'}
 				</button>
 			</form>
 		</div>

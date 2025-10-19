@@ -45,40 +45,64 @@ export default function AllMovies() {
 		}
 	};
 
+	const formatRelativeAdded = (value) => {
+		if (!value) return '—';
+		const d = new Date(value);
+		if (Number.isNaN(d.getTime())) return '—';
+		const today = new Date();
+		const startToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+		const startThat = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+		const diffDays = Math.round((startToday - startThat) / 86400000);
+		if (diffDays <= 0) return 'Hoje';
+		if (diffDays === 1) return 'Ontem';
+		return `${diffDays} dias atrás`;
+	};
+
 	return (
-		<div style={{ background: '#ffffff', borderRadius: 12, padding: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-			<h2 style={{ fontWeight: 700, marginBottom: 12 }}>All Movies</h2>
-			{loading && <div>Loading…</div>}
-			{error && <div style={{ color: '#b91c1c' }}>{error}</div>}
+		<div className="bg-white rounded-xl p-4 shadow">
+			<h2 className="font-bold mb-3">Todos os Filmes</h2>
+			{loading && <div>Carregando…</div>}
+			{error && <div className="text-red-700">{error}</div>}
 			{!loading && !error && (
-				<ul style={{ display: 'grid', gap: 12 }}>
+				<ul className="grid gap-3">
 					{movies.map((m) => (
-						<li key={m._id} style={{ display: 'flex', gap: 12, alignItems: 'center', border: '1px solid #eee', borderRadius: 10, padding: 10 }}>
+						<li key={m._id} className="flex items-center gap-3 border border-gray-200 rounded-lg p-2.5">
 							<img
 								src={m.posterUrl || '/poster-placeholder.svg'}
 								alt={m.title}
 								onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/poster-placeholder.svg'; }}
-								style={{ width: 40, height: 60, objectFit: 'cover', borderRadius: 6, border: '1px solid #f3f4f6' }}
+								className="w-10 h-[60px] object-cover rounded-md border border-gray-100"
 							/>
-							<div style={{ flex: 1 }}>
-								<div style={{ fontWeight: 600 }}>
+							<div className="flex-1">
+								<div className="font-semibold">
 									{m.imdbID ? (
-										<a href={`https://www.imdb.com/title/${m.imdbID}`} target="_blank" rel="noopener noreferrer" style={{ color: '#111827', textDecoration: 'none' }}>
+										<a href={`https://www.imdb.com/title/${m.imdbID}`} target="_blank" rel="noopener noreferrer" className="text-gray-900 no-underline hover:underline">
 											{m.title} {m.year ? `(${m.year})` : ''}
 										</a>
 									) : (
 										<span>{m.title} {m.year ? `(${m.year})` : ''}</span>
 									)}
 								</div>
-								<div style={{ color: '#6b7280', fontSize: 14 }}>{m.genre || '—'}</div>
+								<div className="text-gray-500 text-sm">{m.genre || '—'}</div>
+								<div className="text-gray-400 text-xs">Adicionado {formatRelativeAdded(m.createdAt)}</div>
 							</div>
-							<div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-								<span title="rating" style={{ fontSize: 12, color: '#374151' }}>{m.rating ? `⭐ ${m.rating}` : ''}</span>
-								<button onClick={() => toggleWatched(m)} style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid #d1d5db', background: m.watched ? '#dcfce7' : '#f3f4f6' }}>
-									{m.watched ? 'Watched' : 'Mark watched'}
+							<div className="flex items-center gap-2">
+								<span title="rating" className="text-sm text-gray-700 min-w-[28px] text-right">{m.rating ? `⭐ ${m.rating}` : ''}</span>
+								<button
+									onClick={() => toggleWatched(m)}
+									title={m.watched ? 'Marcar como não visto' : 'Marcar como visto'}
+									aria-label={m.watched ? 'Marcar como não visto' : 'Marcar como visto'}
+									className={`w-7 h-7 rounded-md border border-gray-300 flex items-center justify-center cursor-pointer ${m.watched ? 'bg-green-100' : 'bg-gray-100'}`}
+								>
+									<img src={m.watched ? '/icons/eye-open.svg' : '/icons/eye-closed.svg'} alt="Alternar visto" className="w-4 h-4" />
 								</button>
-								<button onClick={() => deleteMovie(m)} style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid #d1d5db', background: '#fee2e2', color: '#991b1b' }}>
-									Delete
+								<button
+									onClick={() => deleteMovie(m)}
+									title="Apagar"
+									aria-label="Apagar"
+									className="w-7 h-7 rounded-md border border-gray-300 flex items-center justify-center cursor-pointer bg-red-100"
+								>
+									<img src='/icons/trash.svg' alt="Apagar" className="w-4 h-4" />
 								</button>
 							</div>
 						</li>
