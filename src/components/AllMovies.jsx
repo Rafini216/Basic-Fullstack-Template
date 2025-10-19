@@ -61,7 +61,15 @@ export default function AllMovies() {
 								style={{ width: 40, height: 60, objectFit: 'cover', borderRadius: 6, border: '1px solid #f3f4f6' }}
 							/>
 							<div style={{ flex: 1 }}>
-								<div style={{ fontWeight: 600 }}>{m.title} {m.year ? `(${m.year})` : ''}</div>
+								<div style={{ fontWeight: 600 }}>
+									{m.imdbID ? (
+										<a href={`https://www.imdb.com/title/${m.imdbID}`} target="_blank" rel="noopener noreferrer" style={{ color: '#111827', textDecoration: 'none' }}>
+											{m.title} {m.year ? `(${m.year})` : ''}
+										</a>
+									) : (
+										<span>{m.title} {m.year ? `(${m.year})` : ''}</span>
+									)}
+								</div>
 								<div style={{ color: '#6b7280', fontSize: 14 }}>{m.genre || '—'}</div>
 							</div>
 							<div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>

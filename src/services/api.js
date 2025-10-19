@@ -108,3 +108,24 @@ export async function lookupPosterAPI(title, year) {
     throw error;
   }
 }
+
+// GET /api/filmes/search?q=&year=&limit=
+export async function searchMoviesAPI(query, limit = 8, year) {
+  try {
+    const q = String(query || '').trim();
+    if (q.length < 2) return [];
+    const params = new URLSearchParams();
+    params.set('q', q);
+    if (year !== undefined && year !== null && String(year).trim() !== '') {
+      params.set('year', String(year));
+    }
+    if (limit) params.set('limit', String(limit));
+    const url = `/api/filmes/search?${params.toString()}`;
+    const response = await fetch(url);
+    if (!response.ok) return [];
+    return await response.json();
+  } catch (error) {
+    console.error('Erro ao pesquisar filmes:', error);
+    return [];
+  }
+}

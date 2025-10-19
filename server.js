@@ -121,7 +121,7 @@ app.get('/api/filmes', async (req, res) => {
 });
 
 // GET /api/filmes/lookupPoster?title=&year=
-// Usa OMDb para procurar poster (somente retorna metadata; não grava)
+
 app.get('/api/filmes/lookupPoster', async (req, res) => {
   try {
     const { title, year } = req.query || {};
@@ -134,6 +134,46 @@ app.get('/api/filmes/lookupPoster', async (req, res) => {
   } catch (error) {
     console.error('Erro no lookup de poster:', error);
     res.status(500).json({ erro: 'Erro interno do servidor' });
+  }
+});
+
+// GET /api/filmes/search?q=&year=&limit=
+// Lightweight TMDb search to power the typeahead in the client
+app.get('/api/filmes/search', async (req, res) => {
+  try {
+    const q = String(req.query.q || '').trim();
+    const year = req.query.year ? Number(req.query.year) : undefined;
+    const limit = Math.min(Number(req.query.limit) || 8, 20);
+    if (!q || q.length < 2) return res.json([]);
+
+    const apiKey = process.env.TMDB_API_KEY;
+    if (!apiKey) return res.json([]);
+    const language = process.env.TMDB_LANGUAGE || 'en-US';
+
+    const params = new URLSearchParams({
+      api_key: apiKey,
+      query: q,
+      include_adult: 'false',
+      language,
+    });
+    if (year) params.set('year', String(year));
+
+    const resp = await fetch(`https://api.themoviedb.org/3/search/movie?${params.toString()}`);
+    if (!resp.ok) return res.json([]);
+    const data = await resp.json();
+
+    const results = Array.isArray(data.results) ? data.results.slice(0, limit).map(r => ({
+      id: r.id,
+      title: r.title,
+      originalTitle: r.original_title,
+      year: r.release_date ? Number(r.release_date.slice(0, 4)) : undefined,
+      posterUrl: r.poster_path ? `https://image.tmdb.org/t/p/w185${r.poster_path}` : undefined,
+    })) : [];
+
+    res.json(results);
+  } catch (e) {
+    console.error('Erro na pesquisa TMDb:', e);
+    res.json([]);
   }
 });
 
@@ -150,19 +190,20 @@ app.post('/api/filmes', async (req, res) => {
     
 
 
+  
     let posterMeta = {};
-    if (!posterUrl) {
+    try {
       posterMeta = (await fetchPoster(String(title).trim(), undefined)) || {};
-    }
+    } catch {}
 
     const novoFilme = new Movie({
       title: String(title).trim(),
-      year: posterMeta.year || undefined,
+    year: posterMeta.year || undefined,
   genre: (genre && String(genre).trim()) || (Array.isArray(posterMeta.genres) ? posterMeta.genres.join(', ') : undefined),
       watched: Boolean(watched),
   rating: rating === undefined || rating === null ? undefined : Number(rating),
-      posterUrl: posterUrl || posterMeta.posterUrl,
-      imdbID: imdbID || posterMeta.imdbID,
+    posterUrl: posterUrl || posterMeta.posterUrl,
+    imdbID: imdbID || posterMeta.imdbID,
     });
 
     const filmeSalvo = await novoFilme.save();
@@ -176,7 +217,7 @@ app.post('/api/filmes', async (req, res) => {
 app.put('/api/filmes/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, genre, watched, rating, posterUrl, imdbID } = req.body || {};
+    const { title, genre, watched, rating} = req.body || {};
 
     const updates = {};
     if (title !== undefined) {
