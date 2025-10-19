@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AddMovieAPI } from '../services/api';
 import PosterImage from '../components/ui/PosterImage';
-import TitleAutocomplete from '../components/ui/TitleAutocomplete';
+import TitleAutocompleteWithMeta from '../components/ui/TitleAutocompleteWithMeta';
 import FormField from '../components/ui/FormField';
 import RatingSelect from '../components/ui/RatingSelect';
 
@@ -17,17 +17,6 @@ export default function AddMovie() {
 	const [error, setError] = useState('');
 
 
-	const applyPosterMeta = (meta) => {
-		if (!meta) return;
-		if (meta.posterUrl) setPosterUrl(meta.posterUrl);
-		if (meta.year) setDetectedYear(String(meta.year));
-		if (Array.isArray(meta.genres)) {
-			const autoGenres = meta.genres.join(', ');
-			setDetectedGenres(autoGenres);
-			if (!genre.trim() && autoGenres) setGenre(autoGenres);
-		}
-		if (meta.imdbID) setDetectedImdbID(meta.imdbID);
-	};
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -69,15 +58,16 @@ export default function AddMovie() {
 			<h2 className="font-bold mb-3">Add Movie</h2>
 			<form onSubmit={handleSubmit} className="grid gap-2">
 				<FormField label="Title" className="relative">
-					<TitleAutocomplete
+					<TitleAutocompleteWithMeta
 						value={title}
 						onChange={setTitle}
-						onMeta={(meta) => {
-							if (meta) {
-								applyPosterMeta(meta);
-								if (meta.title && meta.title !== title) setTitle(meta.title);
-							}
-						}}
+						setPosterUrl={setPosterUrl}
+						setYear={setDetectedYear}
+						setGenre={setGenre}
+						getGenreValue={() => genre}
+						setDetectedGenres={setDetectedGenres}
+						setImdbID={setDetectedImdbID}
+						overwriteGenreIfEmptyOnly
 					/>
 					{error && <div className="mt-1 text-xs text-red-600">{error}</div>}
 				</FormField>

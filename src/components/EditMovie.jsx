@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import FormField from './ui/FormField';
 import RatingSelect from './ui/RatingSelect';
-import TitleAutocomplete from './ui/TitleAutocomplete';
+import TitleAutocompleteWithMeta from './ui/TitleAutocompleteWithMeta';
 import PosterImage from './ui/PosterImage';
 
 export default function EditMovie({ movie, onClose, onSave, saving = false }) {
@@ -40,20 +40,16 @@ export default function EditMovie({ movie, onClose, onSave, saving = false }) {
         </div>
         <form onSubmit={handleSubmit} className="grid gap-2">
           <FormField label="Título" className="relative">
-            <TitleAutocomplete
+            <TitleAutocompleteWithMeta
               value={title}
               onChange={setTitle}
               skipFirstSearch
-              onMeta={(meta) => {
-                if (!meta) return;
-                if (meta.title && meta.title !== title) setTitle(meta.title);
-                if (Array.isArray(meta.genres) && meta.genres.length) {
-                  setGenre(meta.genres.join(', '));
-                }
-                if (meta.posterUrl) setPosterUrl(meta.posterUrl);
-                if (meta.year) setDetectedYear(String(meta.year));
-                if (meta.imdbID) setImdbID(meta.imdbID);
-              }}
+              setPosterUrl={setPosterUrl}
+              setYear={setDetectedYear}
+              setGenre={setGenre}
+              getGenreValue={() => ''}
+              setImdbID={setImdbID}
+              overwriteGenreIfEmptyOnly={false}
             />
           </FormField>
           <div className="flex items-center gap-2">
