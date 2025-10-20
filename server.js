@@ -10,7 +10,7 @@ const handle = nextApp.getRequestHandler();
 const app = express();
 app.use(cors());
 app.use(express.json());
-
+const { searchMovies, enrichByTitle } = require('./lib/tmdb');// obter poster e metadados via TMDb
 // Modelos Mongoose (adiciona mais se necessário)
 const Movie = require('./models/Filme');
 
@@ -18,79 +18,11 @@ const Movie = require('./models/Filme');
 
 // ===== ENDPOINTS DA API =====
 
-// obter poster via TMDb 
-async function fetchPosterFromTMDb(title, year) {
-  try {
-    const apiKey = process.env.TMDB_API_KEY;
-    if (!apiKey || !title) return null;
 
-    const safeTitle = String(title).trim();
-    const language = process.env.TMDB_LANGUAGE || 'en-US';
-
-    const searchParams = new URLSearchParams({
-      api_key: apiKey,
-      query: safeTitle,
-      include_adult: 'false',
-      language,
-    });
-    if (year) searchParams.set('year', String(year));
-
-    const resp = await fetch(`https://api.themoviedb.org/3/search/movie?${searchParams.toString()}`);
-    if (!resp.ok) return null;
-    const data = await resp.json();
-    if (!data || !Array.isArray(data.results) || data.results.length === 0) return null;
-
-    const normalize = (t) => String(t || '').trim().toLowerCase().replace(/^(the|a|an)\s+/i, '');
-    const wanted = normalize(safeTitle);
-
-    let candidate = data.results.find(item => normalize(item.title) === wanted && item.poster_path);
-    if (!candidate && year) {
-      const y = Number(year);
-      candidate = data.results.find(item => Number(item.release_date?.slice(0,4)) === y && item.poster_path);
-    }
-    if (!candidate) {
-      candidate = data.results.find(item => item.poster_path) || data.results[0];
-    }
-    if (!candidate) return null;
-
-  const posterUrl = candidate.poster_path ? `https://image.tmdb.org/t/p/w500${candidate.poster_path}` : undefined;
-    const resolvedYear = candidate.release_date ? Number(candidate.release_date.slice(0,4)) : undefined;
-  const resolvedTitle = candidate.title;
-  const originalTitle = candidate.original_title;
-
-    // géneros do filme
-    let genres;
-    try {
-      const detailsParams = new URLSearchParams({ api_key: apiKey, language });
-      const detailsResp = await fetch(`https://api.themoviedb.org/3/movie/${candidate.id}?${detailsParams.toString()}`);
-      if (detailsResp.ok) {
-        const details = await detailsResp.json();
-        if (Array.isArray(details.genres)) {
-          genres = details.genres.map(g => g.name).filter(Boolean);
-        }
-      }
-    } catch {}
-
-    // imdbID para link do IMDb
-    let imdbID;
-    try {
-      const extParams = new URLSearchParams({ api_key: apiKey });
-      const extResp = await fetch(`https://api.themoviedb.org/3/movie/${candidate.id}/external_ids?${extParams.toString()}`);
-      if (extResp.ok) {
-        const extData = await extResp.json();
-        if (extData && extData.imdb_id) imdbID = extData.imdb_id;
-      }
-    } catch {}
-
-  return { posterUrl, imdbID, year: resolvedYear, genres, title: resolvedTitle, originalTitle };
-  } catch {
-    return null;
-  }
-}
 
 
 async function fetchPoster(title, year) {
-  return process.env.TMDB_API_KEY ? fetchPosterFromTMDb(title, year) : null;
+  return process.env.TMDB_API_KEY ? enrichByTitle(title, year) : null;
 }
 
 // GET /api/filmes - Carrega todos os filmes, com filtros e ordenação
@@ -98,7 +30,7 @@ app.get('/api/filmes', async (req, res) => {
   try {
     const { watched, sortBy, order } = req.query;
 
- 
+
     const query = {};
     if (watched === 'true' || watched === 'false') {
       query.watched = watched === 'true';
@@ -121,13 +53,13 @@ app.get('/api/filmes/lookupPoster', async (req, res) => {
   try {
     const { title, year } = req.query || {};
     if (!title || !String(title).trim()) {
-      return res.status(400).json({ erro: 'Parâmetro "title" é obrigatório' });
+      return res.status(400).json({ erro: 'título é obrigatório' });
     }
-  const result = await fetchPoster(String(title).trim(), year ? Number(year) : undefined);
+    const result = await fetchPoster(String(title).trim(), year ? Number(year) : undefined);
     if (!result) return res.status(404).json({ erro: 'Poster não encontrado' });
     res.json(result);
   } catch (error) {
-    console.error('Erro no lookup de poster:', error);
+    console.error('Erro ao procurar poster:', error);
     res.status(500).json({ erro: 'Erro interno do servidor' });
   }
 });
@@ -141,30 +73,7 @@ app.get('/api/filmes/search', async (req, res) => {
     const limit = Math.min(Number(req.query.limit) || 8, 20);
     if (!q || q.length < 2) return res.json([]);
 
-    const apiKey = process.env.TMDB_API_KEY;
-    if (!apiKey) return res.json([]);
-    const language = process.env.TMDB_LANGUAGE || 'en-US';
-
-    const params = new URLSearchParams({
-      api_key: apiKey,
-      query: q,
-      include_adult: 'false',
-      language,
-    });
-    if (year) params.set('year', String(year));
-
-    const resp = await fetch(`https://api.themoviedb.org/3/search/movie?${params.toString()}`);
-    if (!resp.ok) return res.json([]);
-    const data = await resp.json();
-
-    const results = Array.isArray(data.results) ? data.results.slice(0, limit).map(r => ({
-      id: r.id,
-      title: r.title,
-      originalTitle: r.original_title,
-      year: r.release_date ? Number(r.release_date.slice(0, 4)) : undefined,
-      posterUrl: r.poster_path ? `https://image.tmdb.org/t/p/w185${r.poster_path}` : undefined,
-    })) : [];
-
+    const results = await searchMovies(q, { year, limit });
     res.json(results);
   } catch (e) {
     console.error('Erro na pesquisa TMDb:', e);
@@ -177,28 +86,24 @@ app.post('/api/filmes', async (req, res) => {
   try {
     const { title, genre, watched, rating, posterUrl, imdbID } = req.body || {};
 
-  
+
     if (!title || !String(title).trim()) {
       return res.status(400).json({ erro: 'Título é obrigatório' });
     }
-    
-    
 
-
-  
     let posterMeta = {};
     try {
       posterMeta = (await fetchPoster(String(title).trim(), undefined)) || {};
-    } catch {}
+    } catch { }
 
     const novoFilme = new Movie({
       title: String(title).trim(),
-    year: posterMeta.year || undefined,
-  genre: (genre && String(genre).trim()) || (Array.isArray(posterMeta.genres) ? posterMeta.genres.join(', ') : undefined),
+      year: posterMeta.year || undefined,
+      genre: (genre && String(genre).trim()) || (Array.isArray(posterMeta.genres) ? posterMeta.genres.join(', ') : undefined),
       watched: Boolean(watched),
-  rating: rating === undefined || rating === null ? undefined : Number(rating),
-    posterUrl: posterUrl || posterMeta.posterUrl,
-    imdbID: imdbID || posterMeta.imdbID,
+      rating: rating === undefined || rating === null ? undefined : Number(rating),
+      posterUrl: posterUrl || posterMeta.posterUrl,
+      imdbID: imdbID || posterMeta.imdbID,
     });
 
     const filmeSalvo = await novoFilme.save();
@@ -208,6 +113,9 @@ app.post('/api/filmes', async (req, res) => {
     res.status(500).json({ erro: 'Erro interno do servidor' });
   }
 });
+
+
+
 // PUT /api/filmes/:id - Atualiza um filme existente
 app.put('/api/filmes/:id', async (req, res) => {
   try {
@@ -249,7 +157,7 @@ app.put('/api/filmes/:id', async (req, res) => {
           if (meta.imdbID) updates.imdbID = meta.imdbID;
           if (meta.year) updates.year = meta.year;
         }
-      } catch {}
+      } catch { }
     }
 
     updates.updatedAt = new Date();
@@ -258,7 +166,7 @@ app.put('/api/filmes/:id', async (req, res) => {
       id,
       { $set: updates },
       { new: true, runValidators: true }
-  ).lean();
+    ).lean();
 
     if (!updated) return res.status(404).json({ erro: 'Filme não encontrado' });
     res.json(updated);
