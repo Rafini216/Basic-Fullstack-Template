@@ -115,7 +115,7 @@ export async function lookupPosterAPI(title, year) {
 }
 
 // GET /api/filmes/search?q=&year=&limit=
-export async function searchMoviesAPI(query, limit = 8, year) {
+export async function searchMoviesAPI(query, limit = 20, year) {
   try {
     const q = String(query || '').trim();
     if (q.length < 2) return [];

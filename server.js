@@ -70,7 +70,7 @@ app.get('/api/filmes/search', async (req, res) => {
   try {
     const q = String(req.query.q || '').trim();
     const year = req.query.year ? Number(req.query.year) : undefined;
-    const limit = Math.min(Number(req.query.limit) || 8, 20);
+    const limit = Math.min(Number(req.query.limit) || 20, 20);
     if (!q || q.length < 2) return res.json([]);
 
     const results = await searchMovies(q, { year, limit });

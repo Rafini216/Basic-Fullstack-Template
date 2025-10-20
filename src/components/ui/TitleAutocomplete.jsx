@@ -36,7 +36,7 @@ export default function TitleAutocomplete({ value, onChange, onMeta, placeholder
     let cancelled = false;
     (async () => {
       try {
-        const items = await searchMoviesAPI(q, 8);
+        const items = await searchMoviesAPI(q, 20);
         if (cancelled) return;
         setSuggestions(items || []);
         setShowSuggestions((items || []).length > 0);
