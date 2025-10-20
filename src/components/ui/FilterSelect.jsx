@@ -7,7 +7,7 @@ export default function FilterSelect({ value, onChange, counts = {}, className =
       value={value}
       onChange={onChange}
       id={id}
-      className={`w-full px-3 py-2 border border-gray-300 rounded-lg bg-white ${className}`}
+      className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100 ${className}`}
       {...props}
     >
       <option value="all">Todos ({all})</option>

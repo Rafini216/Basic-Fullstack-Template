@@ -92,7 +92,7 @@ export default function TitleAutocomplete({ value, onChange, onMeta, placeholder
         }}
         onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
         placeholder={placeholder}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 placeholder-gray-400 text-gray-900 bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700 dark:focus:ring-gray-600 dark:placeholder-gray-500"
       />
       {showSuggestions && suggestions.length > 0 && (
         <SuggestionList

@@ -35,7 +35,7 @@ export default function Home() {
     };
   }, []);
   return (
-    <div className="bg-gray-100 min-h-screen p-5 flex items-center justify-center">
+    <div className="bg-gray-100 dark:bg-gray-950 min-h-screen p-5 flex items-center justify-center text-gray-900 dark:text-gray-100">
       <div className="w-[390px] max-w-full mx-auto flex flex-col gap-5">
         <AddMovie />
         <div className="flex flex-col gap-1">

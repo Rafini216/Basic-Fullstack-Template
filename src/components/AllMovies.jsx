@@ -54,16 +54,16 @@ export default function AllMovies() {
 
 
 	return (
-		<div className="bg-white rounded-xl p-4 shadow">
+		<div className="bg-white dark:bg-gray-900 dark:text-gray-100 rounded-xl p-4 shadow">
 			<h2 className="font-bold mb-3">Todos os Filmes</h2>
 
 			{loading && <div>Carregando…</div>}
-			{error && <div className="text-red-700">{error}</div>}
+			{error && <div className="text-red-700 dark:text-red-400">{error}</div>}
 			{!loading && !error && (
 				<ul className="grid gap-3">
 					{movies.map((m) => (
-						<li key={m._id} className="relative group flex items-center gap-3 border border-gray-200 rounded-lg p-2.5">
-							<PosterImage src={m.posterUrl} alt={m.title} className="w-10 h-[60px] object-cover rounded-md border border-gray-100" />
+						<li key={m._id} className="relative group flex items-center gap-3 border border-gray-200 dark:border-gray-700 rounded-lg p-2.5 bg-white dark:bg-gray-800">
+							<PosterImage src={m.posterUrl} alt={m.title} className="w-10 h-[60px] object-cover rounded-md border border-gray-100 dark:border-gray-700" />
 							<MovieInfo title={m.title} imdbID={m.imdbID} genre={m.genre} year={m.year} createdAt={m.createdAt} updatedAt={m.updatedAt} rating={m.rating} />
 							{!editing && (
 								<MovieActions
