@@ -11,7 +11,6 @@ export default function AddMovie() {
 	const [rating, setRating] = useState('');
 	const [posterUrl, setPosterUrl] = useState('');
 	const [detectedYear, setDetectedYear] = useState('');
-	const [detectedGenres, setDetectedGenres] = useState('');
 	const [detectedImdbID, setDetectedImdbID] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
@@ -62,12 +61,9 @@ export default function AddMovie() {
 						value={title}
 						onChange={setTitle}
 						setPosterUrl={setPosterUrl}
-						setYear={setDetectedYear}
 						setGenre={setGenre}
-						getGenreValue={() => genre}
-						setDetectedGenres={setDetectedGenres}
+						setYear={setDetectedYear}
 						setImdbID={setDetectedImdbID}
-						overwriteGenreIfEmptyOnly
 					/>
 					{error && <div className="mt-1 text-xs text-red-600">{error}</div>}
 				</FormField>

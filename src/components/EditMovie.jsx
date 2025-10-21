@@ -47,9 +47,7 @@ export default function EditMovie({ movie, onClose, onSave, saving = false }) {
               setPosterUrl={setPosterUrl}
               setYear={setDetectedYear}
               setGenre={setGenre}
-              getGenreValue={() => ''}
               setImdbID={setImdbID}
-              overwriteGenreIfEmptyOnly={false}
             />
           </FormField>
           <div className="flex items-center gap-2">

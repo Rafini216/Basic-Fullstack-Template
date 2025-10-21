@@ -19,14 +19,14 @@ export default function TitleAutocomplete({ value, onChange, onMeta, placeholder
       return;
     }
     const q = debouncedTitle.trim();
-    //Skip first search on edit mode
+    // Skippar procura ao abrir editar
     if (skipFirstSearch && !hasTypedRef.current) {
 
       setSuggestions([]);
       setShowSuggestions(false);
       setHighlightIndex(-1);
       return;
-    }
+    }//começar procura depois de 2 chars
     if (q.length < 2) {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -51,7 +51,7 @@ export default function TitleAutocomplete({ value, onChange, onMeta, placeholder
     return () => { cancelled = true; };
   }, [debouncedTitle]);
 
-  // Close suggestions on outside click
+  // fecha sugestões ao clicar fora
   useEffect(() => {
     function handleClickOutside(e) {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -63,7 +63,7 @@ export default function TitleAutocomplete({ value, onChange, onMeta, placeholder
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [showSuggestions]);
-
+//ao escolher sugestão
   const handlePickSuggestion = async (s) => {
     setShowSuggestions(false);
     setSuggestions([]);
@@ -77,7 +77,7 @@ export default function TitleAutocomplete({ value, onChange, onMeta, placeholder
         onChange(meta.title);
       }
     } catch {
-      // Fail silently for metadata lookup
+
     }
   };
 
