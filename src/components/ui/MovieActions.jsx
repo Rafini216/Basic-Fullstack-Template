@@ -1,8 +1,8 @@
 import React from 'react';
 
-export default function MovieActions({ movie, onToggleWatched, onDelete, onEdit, className = '' }) {
+export default function MovieActions({ movie, onToggleWatched, onDelete, onEdit}) {
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
+    <div className="flex items-center gap-2 ">
 
       <button
         onClick={() => onEdit && onEdit(movie)}
@@ -29,9 +29,9 @@ export default function MovieActions({ movie, onToggleWatched, onDelete, onEdit,
         title={movie.watched ? 'Marcar como não visto' : 'Marcar como visto'}
         className={`w-7 h-7 rounded-md border border-gray-300 dark:border-gray-700 flex items-center justify-center cursor-pointer ${movie.watched ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-800'}`}
       >
-        {/* Light icons */}
+       
         <img src={movie.watched ? '/icons/eye-open.svg' : '/icons/eye-closed.svg'} alt="Alternar visto" className="w-4 h-4 dark:hidden" />
-        {/* Dark icons */}
+       
         <img src={movie.watched ? '/icons/eye-open-white.svg' : '/icons/eye-closed-white.svg'} alt="Alternar visto" className="w-4 h-4 hidden dark:inline" />
       </button>
     </div>

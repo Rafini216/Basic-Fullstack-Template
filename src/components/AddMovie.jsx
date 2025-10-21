@@ -41,7 +41,7 @@ export default function AddMovie() {
 			setRating('');
 			setDetectedImdbID('');
 
-			// Notify other components to refresh
+			//refresh pagina depois de adicionar
 			if (typeof window !== 'undefined') {
 				window.dispatchEvent(new CustomEvent('movies:changed'));
 			}

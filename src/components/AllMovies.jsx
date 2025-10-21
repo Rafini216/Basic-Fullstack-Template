@@ -13,11 +13,12 @@ export default function AllMovies() {
 	const [error, setError] = useState('');
 	const [editing, setEditing] = useState(null);
 
+
 	const fetchMovies = async () => {
 		try {
 			setLoading(true);
 			setError('');
-			const data = await loadMoviesAPI({ sortBy: 'createdAt', order: 'desc' });
+			const data = await loadMoviesAPI({ sortBy: 'createdAt', order: "desc" });
 			setMovies(data);
 		} catch (e) {
 			setError(e.message || 'Failed to load movies');
@@ -25,7 +26,7 @@ export default function AllMovies() {
 			setLoading(false);
 		}
 	};
-
+//refresh quando novo filme e adicionado
 	useEffect(() => {
 		fetchMovies();
 		const handler = () => fetchMovies();
@@ -55,7 +56,7 @@ export default function AllMovies() {
 
 	return (
 		<div className="bg-white dark:bg-gray-900 dark:text-gray-100 rounded-xl p-4 shadow">
-			<h2 className="font-bold mb-3">Todos os Filmes</h2>
+			<h2 className="font-bold mb-3">Todos os Filmes</h2> 
 
 			{loading && <div>Carregando…</div>}
 			{error && <div className="text-red-700 dark:text-red-400">{error}</div>}
