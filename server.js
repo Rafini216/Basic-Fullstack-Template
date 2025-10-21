@@ -65,7 +65,7 @@ app.get('/api/filmes/lookupPoster', async (req, res) => {
 });
 
 // GET /api/filmes/search?q=&year=&limit=
-// Lightweight TMDb search to power the typeahead in the client
+// typeahead
 app.get('/api/filmes/search', async (req, res) => {
   try {
     const q = String(req.query.q || '').trim();

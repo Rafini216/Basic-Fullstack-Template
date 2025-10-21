@@ -25,12 +25,7 @@ export async function loadMoviesAPI(options = {}) {
   }
 }
 
-// Small helper to append optional params cleanly
-function setParamIfPresent(params, key, value) {
-  if (value != null && `${value}` !== '') {
-    params.set(key, String(value));
-  }
-}
+
 
 // POST /api/filmes - Adiciona novo filme
 export async function AddMovieAPI(filme) {
@@ -100,7 +95,7 @@ export async function lookupPosterAPI(title, year) {
   try {
     const params = new URLSearchParams();
     if (title) params.set('title', String(title));
-    setParamIfPresent(params, 'year', year);
+    if (year) params.set("year", Number(year))
     const url = `/api/filmes/lookupPoster?${params.toString()}`;
     const response = await fetch(url);
     if (!response.ok) {
@@ -121,7 +116,7 @@ export async function searchMoviesAPI(query, limit = 20, year) {
     if (q.length < 2) return [];
     const params = new URLSearchParams();
     params.set('q', q);
-    setParamIfPresent(params, 'year', year);
+   params.set("year", Number(year))
     if (limit) params.set('limit', String(limit));
     const url = `/api/filmes/search?${params.toString()}`;
     const response = await fetch(url);
